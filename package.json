@@ -1,0 +1,17 @@
+{
+  "name": "cartoon-city-tycoon-online-v3",
+  "version": "3.0.0",
+  "private": true,
+  "description": "2-12 player online cartoon property board game with reconnect, chat, voice, auctions and synchronized mini-games",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "socket.io": "^4.8.1"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
