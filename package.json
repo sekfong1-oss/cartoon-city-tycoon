@@ -1,8 +1,8 @@
 {
-  "name": "cartoon-city-tycoon-online-v5-1-contrast-fix",
-  "version": "5.1.0",
+  "name": "cartoon-city-tycoon-online-v6-3-fx-celebration",
+  "version": "6.3.0",
   "private": true,
-  "description": "2-12 player online 3D board game with improved text contrast and readability across all themes",
+  "description": "2-12 player online board game with dice impact sounds, property purchase animations and winner fireworks/confetti celebration",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"

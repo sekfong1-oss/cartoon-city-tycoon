@@ -100,6 +100,20 @@ function chooseMarket() {
 function characterKey(v) {
   return characters[v] ? v : "tiger";
 }
+function safeAvatar(v) {
+  const s = String(v || "").trim();
+  if (!s) return "";
+  if (s.length > 250000) return "";
+  return /^data:image\/(?:png|jpe?g|webp);base64,[a-z0-9+/=]+$/i.test(s) ? s : "";
+}
+function frameKey(v) {
+  const x = String(v || "").trim().toLowerCase();
+  return ["common","rare","epic","legendary","mythic"].includes(x) ? x : "rare";
+}
+function skinModeKey(v) {
+  const x = String(v || "").trim().toLowerCase();
+  return ["character","cyber","royal","sport"].includes(x) ? x : "character";
+}
 function currentPlayer(room) {
   return room.state ? room.state.players[room.state.current] : null;
 }
@@ -167,7 +181,7 @@ function rtcConfig() {
   return {iceServers};
 }
 
-function createRoom(socket, name, character) {
+function createRoom(socket, name, character, avatar, frame, skinMode) {
   let code;
   do code = makeCode(); while (rooms.has(code));
   const token = makeToken();
@@ -180,6 +194,9 @@ function createRoom(socket, name, character) {
       id:0,
       name:safeText(name,16)||"Player 1",
       character:characterKey(character),
+      avatar:safeAvatar(avatar),
+      frame:frameKey(frame),
+      skinMode:skinModeKey(skinMode),
       sessionToken:token,
       socketId:socket.id,
       connected:true,
@@ -201,7 +218,7 @@ function createRoom(socket, name, character) {
   return {room,token};
 }
 
-function addPlayer(room, socket, name, character) {
+function addPlayer(room, socket, name, character, avatar, frame, skinMode) {
   if (room.phase !== "lobby") throw new Error("Game already started");
   if (room.players.length >= (room.settings?.maxPlayers || 12)) throw new Error("Room is full");
   const id = room.players.length;
@@ -210,6 +227,9 @@ function addPlayer(room, socket, name, character) {
     id,
     name:safeText(name,16)||`Player ${id+1}`,
     character:characterKey(character),
+    avatar:safeAvatar(avatar),
+    frame:frameKey(frame),
+    skinMode:skinModeKey(skinMode),
     sessionToken:token,
     socketId:socket.id,
     connected:true,
@@ -251,6 +271,9 @@ function publicPlayer(p, hostPlayerId) {
     id:p.id,
     name:p.name,
     character:p.character,
+    avatar:p.avatar || "",
+    frame:p.frame || "rare",
+    skinMode:p.skinMode || "character",
     connected:p.connected,
     voice:p.voice,
     isHost:p.id===hostPlayerId
@@ -279,6 +302,9 @@ function initialGamePlayer(rp, cash) {
     id:rp.id,
     name:rp.name,
     character:rp.character,
+    avatar:rp.avatar || "",
+    frame:rp.frame || "rare",
+    skinMode:rp.skinMode || "character",
     connected:rp.connected,
     cash,
     pos:0,
@@ -288,7 +314,8 @@ function initialGamePlayer(rp, cash) {
     laps:0,
     mission:{...chooseMission(),done:false},
     cards:{shield:0,turbo:0,rentBoost:0,taxPass:0},
-    buffs:{turbo:false,rentBoost:false}
+    buffs:{turbo:false,rentBoost:false},
+    doublesStreak:0
   };
 }
 function startState(room) {
@@ -301,8 +328,12 @@ function startState(room) {
     lastRoll:null,
     turnStage:"roll",
     pendingBuy:null,
+    pendingRisk:null,
     auction:null,
     miniGame:null,
+    extraRoll:false,
+    jackpot:300,
+    chaosEvent:null,
     market:chooseMarket(),
     players:room.players.map(rp=>initialGamePlayer(rp,room.settings.startingCash)),
     finished:false,
@@ -351,15 +382,18 @@ function effectiveTax(room,p,amount) {
   if(p.character==="frog") x*=.85;
   return Math.max(0,Math.round(x));
 }
-function payBank(room,p,amount,reason) {
+function payBank(room,p,amount,reason,toJackpot=false) {
   if(p.cards.taxPass>0){
     p.cards.taxPass--;
     addLog(room,`🧿 ${p.name}'s Tax Pass blocked ${reason}.`);
     return 0;
   }
   const due=effectiveTax(room,p,amount);
+  const before=Math.max(0,p.cash);
   p.cash-=due;
-  addLog(room,`🧾 ${p.name} paid ${due} for ${reason}.`);
+  const actual=Math.min(before,due);
+  if(toJackpot && room.state) room.state.jackpot=(room.state.jackpot||0)+actual;
+  addLog(room,`🧾 ${p.name} paid ${due} for ${reason}${toJackpot?` • Jackpot +${actual}`:""}.`);
   return due;
 }
 function transferRent(room,from,to,amount,reason) {
@@ -397,7 +431,7 @@ function chanceEvent(room,p) {
     () => {const x=penalty(100);payBank(room,p,x,"taxi trouble");return `🚕 Taxi Trouble: pay a city fee.`;},
     () => {const x=positive(140);p.cash+=x;return `🎁 Surprise Gift: collect ${x}.`;},
     () => {const x=penalty(45*p.properties.length);payBank(room,p,x,"property repairs");return `🏗️ Repair Day affects your properties.`;},
-    () => {p.pos=10;p.skip=1;return "🚧 Go to Detention and skip your next turn.";},
+    () => {p.pos=10;p.skip=1;if(room.state)room.state.extraRoll=false;return "🚧 Go to Detention and skip your next turn.";},
     () => {p.pos=0;const x=gateReward(p);p.cash+=x;p.laps++;return `🚩 Express Bus to City Gate. Collect ${x}.`;},
     () => {const x=positive(75);p.cash+=x;return `🎪 Street Performance: collect ${x}.`;},
     () => {const x=penalty(85);payBank(room,p,x,"snack shopping");return "💸 Shopping Spree: pay for snacks.";},
@@ -430,6 +464,108 @@ function checkMissions(room) {
     }
   });
 }
+
+function maybeStreetDuel(room,p) {
+  if(!room.state || room.state.finished || p.bankrupt) return;
+  const opponents=room.state.players.filter(x=>!x.bankrupt && x.id!==p.id && x.pos===p.pos);
+  if(!opponents.length) return;
+  if(Math.random()>.55) return; // not every shared tile becomes a duel
+
+  const opp=opponents[Math.floor(Math.random()*opponents.length)];
+  let a=1+Math.floor(Math.random()*6), b=1+Math.floor(Math.random()*6), tries=0;
+  while(a===b && tries<3){
+    a=1+Math.floor(Math.random()*6);
+    b=1+Math.floor(Math.random()*6);
+    tries++;
+  }
+  if(a===b){
+    addLog(room,`⚔️ Street Duel! ${p.name} and ${opp.name} tied ${a}-${b}. Nobody wins.`);
+    return;
+  }
+  const winner=a>b?p:opp;
+  const reward=120;
+  winner.cash+=reward;
+  addLog(room,`⚔️ Street Duel! ${p.name} rolled ${a}, ${opp.name} rolled ${b}. ${winner.name} wins ${reward}!`);
+}
+
+function runChaosEvent(room) {
+  if(!room.state || room.state.finished) return;
+  const active=room.state.players.filter(p=>!p.bankrupt);
+  const events=[
+    {
+      icon:"💰",name:"City Stimulus",text:"Every active player receives 120.",
+      run:()=>active.forEach(p=>p.cash+=120)
+    },
+    {
+      icon:"🎁",name:"Power Card Drop",text:"Every active player receives a random power card.",
+      run:()=>{
+        const types=["shield","turbo","rentBoost","taxPass"];
+        active.forEach(p=>grantCard(room,p,types[Math.floor(Math.random()*types.length)]));
+      }
+    },
+    {
+      icon:"🏦",name:"Jackpot Surge",text:"The City Jackpot increases by 350.",
+      run:()=>room.state.jackpot=(room.state.jackpot||0)+350
+    },
+    {
+      icon:"🏠",name:"Property Dividend",text:"Owners receive 45 for each property they own.",
+      run:()=>active.forEach(p=>p.cash+=45*p.properties.length)
+    },
+    {
+      icon:"🧱",name:"Free Construction",text:"One random eligible property gets a free upgrade.",
+      run:()=>{
+        const eligible=[];
+        active.forEach(p=>p.properties.forEach(idx=>{
+          if((room.state.levels[idx]||0)<3) eligible.push({p,idx});
+        }));
+        if(eligible.length){
+          const pick=eligible[Math.floor(Math.random()*eligible.length)];
+          room.state.levels[pick.idx]++;
+          addLog(room,`🧱 ${pick.p.name}'s ${boardData[pick.idx].name} received a free upgrade!`);
+        }else{
+          room.state.jackpot=(room.state.jackpot||0)+200;
+        }
+      }
+    },
+    {
+      icon:"🌱",name:"Comeback Bonus",text:"Players with no property receive 180.",
+      run:()=>active.filter(p=>p.properties.length===0).forEach(p=>p.cash+=180)
+    }
+  ];
+  const e=events[Math.floor(Math.random()*events.length)];
+  e.run();
+  room.state.chaosEvent={icon:e.icon,name:e.name,text:e.text,round:room.state.round};
+  addLog(room,`${e.icon} CITY CHAOS: ${e.name} — ${e.text}`);
+}
+
+function resolveFestivalChoice(room,p,choice) {
+  const pending=room.state.pendingRisk;
+  if(!pending) throw new Error("No festival decision pending");
+  const base=pending.amount;
+  const safeReward=Math.round(base*market(room).festivalMult);
+  let reward=0;
+
+  if(choice==="safe"){
+    reward=safeReward;
+    addLog(room,`🎪 ${p.name} took the safe festival reward: ${reward}.`);
+  }else if(choice==="risk"){
+    const chance=p.character==="frog"?.65:.50;
+    const won=Math.random()<chance;
+    reward=won?safeReward*2:0;
+    addLog(room,won
+      ?`🎰 ${p.name} risked the festival reward and WON ${reward}!`
+      :`🎰 ${p.name} risked the festival reward and lost it.`);
+  }else{
+    throw new Error("Invalid festival choice");
+  }
+
+  p.cash+=reward;
+  room.state.pendingRisk=null;
+  room.state.turnStage="end";
+  maybeStreetDuel(room,p);
+  checkMissions(room);
+}
+
 function checkBankruptcy(room,p) {
   if(p.bankrupt || p.cash>=0) return false;
   p.bankrupt=true;
@@ -501,7 +637,7 @@ function startMiniGame(room) {
   const participants=miniParticipants(room);
   if(participants.length<2) return false;
 
-  const types=["quickMath","treasure","dicePrediction","reaction"];
+  const types=["quickMath","treasure","dicePrediction","reaction","closestNumber","rps"];
   const type=types[Math.floor(Math.random()*types.length)];
   const now=Date.now();
   const mg={
@@ -539,11 +675,20 @@ function startMiniGame(room) {
     mg.title="🎲 Dice Prediction";
     mg.instructions="Predict LOW (2–6), EXACT 7, or HIGH (8–12).";
     mg.endsAt=now+14000;
-  }else{
+  }else if(type==="reaction"){
     mg.title="⚡ Reaction Rush";
     mg.instructions="Wait for GO, then hit the reaction button. Clicking early does not count.";
     mg.startAt=now+2200+Math.floor(Math.random()*2800);
     mg.endsAt=mg.startAt+7000;
+  }else if(type==="closestNumber"){
+    mg.title="🎯 Closest Number";
+    mg.instructions="Guess a number from 1 to 100. The closest guesses win.";
+    mg.endsAt=now+15000;
+    secret.target=1+Math.floor(Math.random()*100);
+  }else{
+    mg.title="✊ Boss RPS";
+    mg.instructions="Choose Rock, Paper or Scissors. Beat the City Boss hand to win bonus cash.";
+    mg.endsAt=now+14000;
   }
 
   room.state.miniGame=mg;
@@ -583,7 +728,7 @@ function maybeFinalizeMiniEarly(room) {
   const eligible=miniEligibleNow(room);
   if(!eligible.length) return finalizeMiniGame(room.code);
 
-  if(["treasure","dicePrediction"].includes(mg.type)){
+  if(["treasure","dicePrediction","closestNumber","rps"].includes(mg.type)){
     if(eligible.every(id=>mg.submittedIds.includes(id))) finalizeMiniGame(room.code);
   }else if(["quickMath","reaction"].includes(mg.type)){
     const target=Math.min(3,eligible.length);
@@ -633,6 +778,28 @@ function finalizeMiniGame(code) {
         reward=pick==="seven"?300:160;
         label=pick==="seven"?"Exact 7!":"Correct prediction";
       }
+      miniRewardPlayer(room,id,reward,label,results);
+    }
+  }else if(mg.type==="closestNumber"){
+    const target=Number(secret.target);
+    mg.reveal={target};
+    const guesses=Object.entries(secret.submissions||{}).map(([idRaw,value])=>({
+      id:Number(idRaw),value:Number(value),diff:Math.abs(Number(value)-target)
+    })).sort((a,b)=>a.diff-b.diff || a.id-b.id);
+    const prizes=[220,140,90];
+    guesses.forEach((g,i)=>{
+      miniRewardPlayer(room,g.id,i<3?prizes[i]:20,i<3?`Guess ${g.value} • ${i+1}${i===0?"st":i===1?"nd":"rd"} closest`:`Guess ${g.value}`,results);
+    });
+  }else if(mg.type==="rps"){
+    const hands=["rock","paper","scissors"];
+    const boss=hands[Math.floor(Math.random()*hands.length)];
+    mg.reveal={boss};
+    const beats={rock:"scissors",paper:"rock",scissors:"paper"};
+    for(const [idRaw,pick] of Object.entries(secret.submissions||{})){
+      const id=Number(idRaw);
+      let reward=15,label=`${pick} vs ${boss} • loss`;
+      if(pick===boss){reward=45;label=`${pick} vs ${boss} • tie`;}
+      else if(beats[pick]===boss){reward=170;label=`${pick} beats ${boss}!`;}
       miniRewardPlayer(room,id,reward,label,results);
     }
   }
@@ -704,6 +871,17 @@ function submitMiniGame(room,p,value) {
     if(!["low","seven","high"].includes(value)) throw new Error("Invalid prediction");
     secret.submissions[p.id]=value;
     mg.submittedIds.push(p.id);
+  }else if(mg.type==="closestNumber"){
+    if(mg.submittedIds.includes(p.id)) throw new Error("You already guessed");
+    const guess=Math.floor(Number(value));
+    if(!Number.isFinite(guess)||guess<1||guess>100) throw new Error("Guess must be from 1 to 100");
+    secret.submissions[p.id]=guess;
+    mg.submittedIds.push(p.id);
+  }else if(mg.type==="rps"){
+    if(mg.submittedIds.includes(p.id)) throw new Error("You already chose");
+    if(!["rock","paper","scissors"].includes(value)) throw new Error("Invalid choice");
+    secret.submissions[p.id]=value;
+    mg.submittedIds.push(p.id);
   }else if(mg.type==="reaction"){
     if(mg.submittedIds.includes(p.id)) throw new Error("You already clicked");
     if(Date.now()<mg.startAt) throw new Error("Too early! Wait for GO.");
@@ -723,6 +901,19 @@ function newMarket(room) {
 }
 function advanceTurn(room) {
   if(room.state.finished) return;
+
+  const current=currentPlayer(room);
+  if(room.state.extraRoll && current && !current.bankrupt && current.skip===0){
+    room.state.extraRoll=false;
+    room.state.lastRoll=null;
+    room.state.pendingBuy=null;
+    room.state.pendingRisk=null;
+    room.state.auction=null;
+    room.state.turnStage="roll";
+    addLog(room,`🎲 DOUBLES! ${current.name} gets another roll.`);
+    return;
+  }
+
   let next=room.state.current, guard=0;
   do{
     next=(next+1)%room.state.players.length;
@@ -738,9 +929,11 @@ function advanceTurn(room) {
       return;
     }
     newMarket(room);
+    if(room.state.round%4===0) runChaosEvent(room);
   }
 
   room.state.current=next;
+  room.state.extraRoll=false;
   room.state.lastRoll=null;
   room.state.pendingBuy=null;
   room.state.auction=null;
@@ -860,20 +1053,25 @@ function resolveLanding(room) {
     addLog(room,`${p.name}: ${chanceEvent(room,p)}`);
     checkBankruptcy(room,p);
   }else if(t.type==="tax"){
-    payBank(room,p,t.amount,t.name);
+    payBank(room,p,t.amount,t.name,true);
     checkBankruptcy(room,p);
   }else if(t.type==="festival"){
-    const reward=Math.round(t.amount*market(room).festivalMult);
-    p.cash+=reward;
-    addLog(room,`🎪 ${p.name} collected ${reward} at ${t.name}.`);
+    room.state.pendingRisk={amount:t.amount,tileName:t.name};
+    room.state.turnStage="riskDecision";
+    addLog(room,`🎪 ${p.name} may take the festival reward safely or gamble for double.`);
+    return;
   }else if(t.type==="rest"){
-    addLog(room,`🌴 ${p.name} relaxes at Chill Zone.`);
+    const jackpot=Math.max(0,Math.round(room.state.jackpot||0));
+    p.cash+=jackpot;
+    room.state.jackpot=200;
+    addLog(room,`🏦 JACKPOT! ${p.name} collected ${jackpot} at Chill Zone! Jackpot resets to 200.`);
   }else if(t.type==="jail"){
     addLog(room,`🚧 ${p.name} is just visiting Detention.`);
   }else{
     addLog(room,`🚩 ${p.name} landed on City Gate.`);
   }
 
+  maybeStreetDuel(room,p);
   checkMissions(room);
   if(!room.state.finished && room.state.turnStage!=="auction") room.state.turnStage="end";
 }
@@ -910,8 +1108,17 @@ function scheduleDisconnectSkip(room,pid) {
       emitRoom(r);
       return;
     }
+    if(stage==="riskDecision" && r.state.pendingRisk){
+      try{
+        resolveFestivalChoice(r,currentPlayer(r),"safe");
+        addLog(r,`⏱️ ${rp.name} stayed offline, so the safe festival reward was chosen automatically.`);
+      }catch(e){}
+      emitRoom(r);
+      return;
+    }
     if(stage==="auction") return;
     addLog(r,`⏱️ ${rp.name} stayed offline, so their turn was automatically skipped.`);
+    r.state.extraRoll=false;
     advanceTurn(r);
     emitRoom(r);
   },45000);
@@ -983,19 +1190,19 @@ function rateLimit(socket,key,ms) {
 io.on("connection", socket => {
   socket.emit("hello",{socketId:socket.id,boardData,characters,rtcConfig:rtcConfig()});
 
-  socket.on("room:create",({name,character},cb)=>{
+  socket.on("room:create",({name,character,avatar,frame,skinMode},cb)=>{
     try{
-      const {room,token}=createRoom(socket,name,character);
+      const {room,token}=createRoom(socket,name,character,avatar,frame,skinMode);
       emitRoom(room);
       cb?.({ok:true,code:room.code,playerId:0,sessionToken:token});
     }catch(e){cb?.({ok:false,error:e.message});}
   });
 
-  socket.on("room:join",({code,name,character},cb)=>{
+  socket.on("room:join",({code,name,character,avatar,frame,skinMode},cb)=>{
     try{
       const room=rooms.get(safeText(code,5).toUpperCase());
       if(!room) throw new Error("Room not found");
-      const {player,token}=addPlayer(room,socket,name,character);
+      const {player,token}=addPlayer(room,socket,name,character,avatar,frame,skinMode);
       emitRoom(room);
       cb?.({ok:true,code:room.code,playerId:player.id,sessionToken:token});
     }catch(e){cb?.({ok:false,error:e.message});}
@@ -1011,13 +1218,16 @@ io.on("connection", socket => {
     }catch(e){cb?.({ok:false,error:e.message});}
   });
 
-  socket.on("room:profile",({name,character})=>{
+  socket.on("room:profile",({name,character,avatar,frame,skinMode})=>{
     const room=rooms.get(socket.data.roomCode);
     const p=room && roomPlayerBySocket(room,socket);
     if(!room || !p || room.phase!=="lobby") return;
     p.name=safeText(name,16)||p.name;
     p.character=characterKey(character);
-    addLog(room,`🎭 ${p.name} updated their character.`);
+    p.avatar = avatar === undefined ? (p.avatar || "") : safeAvatar(avatar);
+    p.frame = frame === undefined ? (p.frame || "rare") : frameKey(frame);
+    p.skinMode = skinMode === undefined ? (p.skinMode || "character") : skinModeKey(skinMode);
+    addLog(room,`🎭 ${p.name} updated their character/profile.`);
     emitRoom(room);
   });
 
@@ -1036,6 +1246,38 @@ io.on("connection", socket => {
     if([6,8,10,12].includes(maxPlayers) && maxPlayers>=room.players.length) room.settings.maxPlayers=maxPlayers;
     if([0,2,3,4,5].includes(miniGameEvery)) room.settings.miniGameEvery=miniGameEvery;
     emitRoom(room);
+  });
+
+
+  socket.on("game:rematch",(_,cb)=>{
+    const room=rooms.get(socket.data.roomCode);
+    const rp=room && roomPlayerBySocket(room,socket);
+    if(!room) return cb?.({ok:false,error:"Room not found"});
+    if(!rp || rp.id!==room.hostPlayerId) return cb?.({ok:false,error:"Only the host can restart the match"});
+    if(room.phase!=="finished") return cb?.({ok:false,error:"The current match has not ended"});
+    clearAuctionTimer(room.code);
+    clearMiniGameTimer(room.code);
+    room.phase="playing";
+    room.state=startState(room);
+    addLog(room,`🔁 ${rp.name} started a rematch with the same room and players.`);
+    addLog(room,`${room.state.market.icon} Starting market: ${room.state.market.name}.`);
+    emitRoom(room);
+    cb?.({ok:true});
+  });
+
+  socket.on("game:returnLobby",(_,cb)=>{
+    const room=rooms.get(socket.data.roomCode);
+    const rp=room && roomPlayerBySocket(room,socket);
+    if(!room) return cb?.({ok:false,error:"Room not found"});
+    if(!rp || rp.id!==room.hostPlayerId) return cb?.({ok:false,error:"Only the host can return to lobby"});
+    if(room.phase!=="finished") return cb?.({ok:false,error:"The current match has not ended"});
+    clearAuctionTimer(room.code);
+    clearMiniGameTimer(room.code);
+    room.phase="lobby";
+    room.state=null;
+    addLog(room,`🏠 ${rp.name} returned everyone to the lobby.`);
+    emitRoom(room);
+    cb?.({ok:true});
   });
 
   socket.on("game:start",(_,cb)=>{
@@ -1065,10 +1307,30 @@ io.on("connection", socket => {
     const d2=1+Math.floor(Math.random()*6);
     const bonus=p.buffs.turbo?3:0;
     p.buffs.turbo=false;
+    const doubles=d1===d2;
+
+    if(doubles) p.doublesStreak=(p.doublesStreak||0)+1;
+    else p.doublesStreak=0;
+
     room.state.lastRoll=[d1,d2,bonus];
-    addLog(room,`🎲 ${p.name} rolled ${d1}+${d2}${bonus?` + Turbo ${bonus}`:""} = ${d1+d2+bonus}.`);
+    room.state.extraRoll=doubles;
+
+    if(p.doublesStreak>=3){
+      p.doublesStreak=0;
+      room.state.extraRoll=false;
+      p.pos=10;
+      p.skip=1;
+      room.state.turnStage="end";
+      addLog(room,`🚓 THREE DOUBLES! ${p.name} is sent straight to Detention and will miss the next turn.`);
+      emitRoom(room);
+      return cb?.({ok:true,roll:[d1,d2],bonus,doubles:true,detention:true});
+    }
+
+    addLog(room,`🎲 ${p.name} rolled ${d1}+${d2}${bonus?` + Turbo ${bonus}`:""} = ${d1+d2+bonus}${doubles?" • DOUBLES!":""}.`);
     movePlayer(room,p,d1+d2+bonus);
     resolveLanding(room);
+
+    if(p.skip>0) room.state.extraRoll=false;
     emitRoom(room);
     cb?.({ok:true,roll:[d1,d2],bonus});
   });
@@ -1103,6 +1365,20 @@ io.on("connection", socket => {
 
     emitRoom(room);
     cb?.({ok:true});
+  });
+
+
+  socket.on("game:festivalChoice",({choice},cb)=>{
+    const room=rooms.get(socket.data.roomCode);
+    if(!room || room.phase!=="playing" || !actorIsCurrent(room,socket))
+      return cb?.({ok:false,error:"Not your turn"});
+    if(room.state.turnStage!=="riskDecision" || !room.state.pendingRisk)
+      return cb?.({ok:false,error:"No festival choice pending"});
+    try{
+      resolveFestivalChoice(room,currentPlayer(room),safeText(choice,12));
+      emitRoom(room);
+      cb?.({ok:true});
+    }catch(e){cb?.({ok:false,error:e.message});}
   });
 
   socket.on("game:upgrade",(_,cb)=>{
