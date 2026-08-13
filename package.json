@@ -1,8 +1,8 @@
 {
-  "name": "cartoon-city-tycoon-online-v3",
-  "version": "3.0.0",
+  "name": "cartoon-city-tycoon-online-v5-theme-fusion",
+  "version": "5.0.0",
   "private": true,
-  "description": "2-12 player online cartoon property board game with reconnect, chat, voice, auctions and synchronized mini-games",
+  "description": "2-12 player online 3D board game with fusion, realistic, neon cyber and luxury themes plus adaptive low background music",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"

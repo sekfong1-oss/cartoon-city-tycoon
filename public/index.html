@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
-<title>Cartoon City Tycoon Online V2</title>
+<title>Cartoon City Tycoon V5 Theme Fusion</title>
 <style>
 :root{
   --ink:#24305e;--panel:#ffffffdf;--shadow:0 16px 42px rgba(37,49,105,.18);
@@ -162,17 +162,427 @@ label{display:block;font-size:11px;font-weight:950;text-transform:uppercase;lett
 .miniResult{display:flex;justify-content:space-between;gap:10px;background:#fff;border-radius:14px;padding:10px 12px;font-weight:900}
 @media(max-width:560px){.chestGrid{grid-template-columns:repeat(3,1fr)}.predictGrid{grid-template-columns:1fr}}
 
+
+/* ===== V4 3D visual upgrade ===== */
+body{
+  perspective:1800px;
+  overflow-x:hidden;
+}
+.wrap{position:relative}
+.wrap::before{
+  content:"";
+  position:fixed;inset:-10%;
+  background:
+    radial-gradient(circle at 20% 20%,rgba(255,255,255,.16),transparent 18%),
+    radial-gradient(circle at 80% 10%,rgba(255,255,255,.12),transparent 16%),
+    radial-gradient(circle at 50% 90%,rgba(255,255,255,.08),transparent 20%);
+  pointer-events:none;
+  animation:floatGlow 16s ease-in-out infinite alternate;
+}
+@keyframes floatGlow{
+  from{transform:translate3d(0,0,0) scale(1)}
+  to{transform:translate3d(0,-12px,0) scale(1.04)}
+}
+.panel,.card{
+  box-shadow:
+    0 20px 50px rgba(15,16,55,.26),
+    inset 0 1px 0 rgba(255,255,255,.34);
+}
+.boardWrap{
+  perspective:2200px;
+  padding:30px 0 24px;
+}
+.board{
+  transform-style:preserve-3d;
+  transform:rotateX(17deg) rotateZ(-2deg);
+  transition:transform .45s ease, box-shadow .45s ease;
+  box-shadow:
+    0 38px 80px rgba(20,25,70,.34),
+    0 12px 22px rgba(0,0,0,.18);
+}
+.board:hover{
+  transform:rotateX(12deg) rotateZ(0deg) scale(1.01);
+}
+.tile,.centerZone{
+  transform-style:preserve-3d;
+}
+.tile{
+  transform:translateZ(22px);
+  background:linear-gradient(180deg,#ffffff,#f7f8ff);
+  box-shadow:
+    0 10px 18px rgba(66,72,130,.20),
+    inset 0 1px 0 rgba(255,255,255,.7);
+}
+.tile:hover{
+  transform:translateZ(35px) scale(1.04);
+  box-shadow:
+    0 22px 34px rgba(66,72,130,.28),
+    inset 0 1px 0 rgba(255,255,255,.8);
+}
+.tile::after{
+  content:"";
+  position:absolute;left:6px;right:6px;bottom:4px;height:10px;
+  border-radius:10px;
+  background:linear-gradient(180deg,rgba(40,45,90,.12),rgba(40,45,90,0));
+  transform:translateZ(-1px);
+}
+.centerZone{
+  transform:translateZ(35px);
+  box-shadow:
+    0 22px 40px rgba(45,52,120,.22),
+    inset 0 1px 0 rgba(255,255,255,.75);
+  background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(236,235,255,.97));
+}
+.dice{
+  box-shadow:
+    0 10px 0 #b9c1ee,
+    0 18px 22px rgba(39,49,110,.24);
+  transform:translateZ(35px);
+}
+.token{
+  width:28px;height:28px;
+  box-shadow:
+    0 8px 14px rgba(36,48,94,.40),
+    inset 0 1px 0 rgba(255,255,255,.6);
+  animation:bob3d 1.25s ease-in-out infinite alternate;
+}
+@keyframes bob3d{
+  0%{transform:translateY(0) translateZ(0) rotate(-2deg)}
+  100%{transform:translateY(-5px) translateZ(10px) rotate(4deg)}
+}
+.actionCard,.row,.voiceStatus,.chatMessages,#log,.mini{
+  box-shadow:
+    0 10px 18px rgba(33,40,91,.11),
+    inset 0 1px 0 rgba(255,255,255,.55);
+}
+.cityTitle{
+  text-shadow:0 6px 16px rgba(76,76,172,.22);
+}
+button{
+  box-shadow:
+    0 6px 0 rgba(73,59,182,.95),
+    0 13px 18px rgba(61,45,149,.22);
+}
+button.gold{
+  box-shadow:
+    0 6px 0 #d17a15,
+    0 13px 18px rgba(166,99,18,.20);
+}
+button.good{
+  box-shadow:
+    0 6px 0 #16845a,
+    0 13px 18px rgba(18,132,90,.20);
+}
+button.red{
+  box-shadow:
+    0 6px 0 #bb3451,
+    0 13px 18px rgba(187,52,81,.20);
+}
+.status .stat,.lobby .notice{
+  backdrop-filter:blur(6px);
+}
+
+
+/* ===== V5 Theme Fusion: Realistic 3D + Neon Cyber + Luxury Casino ===== */
+:root{
+  --v5-glow:rgba(126,103,255,.40);
+  --v5-accent:#7d6bff;
+  --v5-accent2:#ff6bb8;
+  --v5-metal:#dce4ff;
+  --v5-boardTop:#effcff;
+  --v5-boardBottom:#dcd9ff;
+  --v5-tileTop:#ffffff;
+  --v5-tileBottom:#f4f6ff;
+  --v5-surface:rgba(255,255,255,.88);
+  --v5-shadow:rgba(18,20,66,.32);
+}
+body{
+  transition:background .55s ease,color .4s ease,filter .4s ease;
+}
+body[data-theme="fusion"]{
+  --v5-glow:rgba(119,89,255,.48);
+  --v5-accent:#7568ff;
+  --v5-accent2:#ff70b8;
+  --v5-metal:#dbe3ff;
+  --v5-boardTop:#eafdff;
+  --v5-boardBottom:#d8d4ff;
+  --v5-tileTop:#ffffff;
+  --v5-tileBottom:#f3f3ff;
+  background:
+    radial-gradient(circle at 12% 12%,rgba(0,240,255,.18),transparent 22%),
+    radial-gradient(circle at 84% 15%,rgba(255,70,180,.18),transparent 24%),
+    linear-gradient(140deg,#09152c,#1c2058 45%,#411e5a 72%,#1a1336);
+  color:#eaf0ff;
+}
+body[data-theme="realistic"]{
+  --v5-glow:rgba(70,120,180,.30);
+  --v5-accent:#5c8ebd;
+  --v5-accent2:#89b9d8;
+  --v5-metal:#d5dee7;
+  --v5-boardTop:#e9ecef;
+  --v5-boardBottom:#cfd8df;
+  --v5-tileTop:#fbfcfd;
+  --v5-tileBottom:#e6ebee;
+  background:
+    radial-gradient(circle at 18% 10%,rgba(255,255,255,.18),transparent 20%),
+    linear-gradient(145deg,#203242,#3b5265 48%,#263b49);
+  color:#edf4f8;
+}
+body[data-theme="cyber"]{
+  --v5-glow:rgba(0,255,255,.50);
+  --v5-accent:#00e5ff;
+  --v5-accent2:#ff21c8;
+  --v5-metal:#66f7ff;
+  --v5-boardTop:#0d1634;
+  --v5-boardBottom:#171347;
+  --v5-tileTop:#111a35;
+  --v5-tileBottom:#19113c;
+  background:
+    radial-gradient(circle at 20% 12%,rgba(0,255,255,.16),transparent 22%),
+    radial-gradient(circle at 80% 20%,rgba(255,0,200,.18),transparent 24%),
+    linear-gradient(145deg,#030714,#09112e 48%,#170622);
+  color:#e6fbff;
+}
+body[data-theme="luxury"]{
+  --v5-glow:rgba(255,201,77,.40);
+  --v5-accent:#f4c34f;
+  --v5-accent2:#e89e26;
+  --v5-metal:#f3df9b;
+  --v5-boardTop:#302516;
+  --v5-boardBottom:#16110c;
+  --v5-tileTop:#fff9ea;
+  --v5-tileBottom:#eadfbe;
+  background:
+    radial-gradient(circle at 20% 10%,rgba(255,214,112,.17),transparent 22%),
+    radial-gradient(circle at 78% 18%,rgba(255,184,69,.12),transparent 24%),
+    linear-gradient(145deg,#080706,#18110a 48%,#2a1d0e);
+  color:#fff5d5;
+}
+.themeSelect{
+  width:auto;
+  min-width:170px;
+  background:rgba(255,255,255,.92);
+  color:#25305d;
+  outline:2px solid rgba(255,255,255,.22);
+  box-shadow:0 8px 20px rgba(0,0,0,.16);
+}
+.v5Ambient{
+  position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;
+}
+.skyline{
+  position:absolute;left:-4%;right:-4%;bottom:-1px;height:23vh;opacity:.22;
+  background:
+    linear-gradient(to top,rgba(2,7,20,.95),rgba(2,7,20,.15)),
+    repeating-linear-gradient(90deg,
+      transparent 0 3%,
+      rgba(255,255,255,.18) 3.1% 3.45%,
+      transparent 3.55% 6.4%);
+  clip-path:polygon(
+    0 100%,0 68%,4% 68%,4% 41%,8% 41%,8% 61%,12% 61%,12% 28%,
+    16% 28%,16% 58%,20% 58%,20% 34%,24% 34%,24% 72%,28% 72%,
+    28% 47%,32% 47%,32% 24%,36% 24%,36% 62%,40% 62%,40% 38%,
+    44% 38%,44% 66%,48% 66%,48% 31%,52% 31%,52% 55%,56% 55%,
+    56% 21%,60% 21%,60% 64%,64% 64%,64% 36%,68% 36%,68% 70%,
+    72% 70%,72% 27%,76% 27%,76% 52%,80% 52%,80% 33%,84% 33%,
+    84% 63%,88% 63%,88% 43%,92% 43%,92% 69%,96% 69%,96% 32%,
+    100% 32%,100% 100%
+  );
+}
+.skylineBack{transform:scale(1.08);filter:blur(1px);opacity:.12;bottom:4vh}
+.skylineFront{animation:skylineFloat 9s ease-in-out infinite alternate}
+@keyframes skylineFloat{to{transform:translateY(7px)}}
+.lightBeam{
+  position:absolute;top:-20%;width:220px;height:135vh;
+  background:linear-gradient(180deg,rgba(255,255,255,.0),var(--v5-glow),rgba(255,255,255,0));
+  filter:blur(18px);opacity:.18;transform:rotate(17deg);
+  animation:beamSweep 13s ease-in-out infinite alternate;
+}
+.beam1{left:12%}.beam2{right:11%;animation-delay:-5s;transform:rotate(-17deg)}
+@keyframes beamSweep{to{transform:translateX(110px) rotate(17deg);opacity:.28}}
+.orb{
+  position:absolute;border-radius:50%;filter:blur(8px);opacity:.22;
+  background:radial-gradient(circle,var(--v5-accent),transparent 68%);
+  animation:orbFloat 10s ease-in-out infinite alternate;
+}
+.orb1{width:180px;height:180px;left:6%;top:13%}
+.orb2{width:260px;height:260px;right:4%;top:32%;animation-delay:-3s}
+.orb3{width:150px;height:150px;left:48%;bottom:4%;animation-delay:-6s}
+@keyframes orbFloat{to{transform:translate3d(24px,-28px,0) scale(1.14)}}
+.scanline{
+  position:absolute;inset:0;
+  background:repeating-linear-gradient(180deg,transparent 0 4px,rgba(255,255,255,.018) 5px 6px);
+  opacity:.35;
+}
+.wrap{z-index:1}
+.logo,.panel,.card{
+  background:
+    linear-gradient(145deg,rgba(255,255,255,.17),rgba(255,255,255,.055)),
+    var(--panel);
+  border-color:rgba(255,255,255,.24);
+}
+body[data-theme="cyber"] .logo,
+body[data-theme="cyber"] .panel,
+body[data-theme="cyber"] .card{
+  background:linear-gradient(145deg,rgba(10,24,52,.94),rgba(18,10,46,.94));
+  border-color:rgba(0,229,255,.30);
+  box-shadow:0 0 0 1px rgba(255,33,200,.15),0 20px 50px rgba(0,0,0,.40),0 0 32px rgba(0,229,255,.10);
+}
+body[data-theme="luxury"] .logo,
+body[data-theme="luxury"] .panel,
+body[data-theme="luxury"] .card{
+  background:linear-gradient(145deg,rgba(34,26,17,.96),rgba(15,12,9,.96));
+  border-color:rgba(244,195,79,.32);
+  box-shadow:0 20px 50px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,221,131,.20);
+}
+.board{
+  background:linear-gradient(145deg,var(--v5-boardTop),var(--v5-boardBottom));
+  border-color:rgba(255,255,255,.62);
+  position:relative;
+}
+.board::before{
+  content:"";
+  position:absolute;inset:-14px;border-radius:44px;
+  border:1px solid var(--v5-metal);
+  box-shadow:
+    0 0 35px var(--v5-glow),
+    inset 0 0 26px rgba(255,255,255,.14);
+  pointer-events:none;
+}
+body[data-theme="cyber"] .board{
+  border-color:#00e5ff55;
+  box-shadow:0 35px 90px rgba(0,0,0,.55),0 0 36px rgba(0,229,255,.12),0 0 60px rgba(255,33,200,.08);
+}
+body[data-theme="luxury"] .board{
+  border-color:#f4c34f70;
+  box-shadow:0 40px 90px rgba(0,0,0,.55),0 0 26px rgba(244,195,79,.12);
+}
+.tile{
+  background:linear-gradient(180deg,var(--v5-tileTop),var(--v5-tileBottom));
+  border-color:rgba(135,145,190,.28);
+}
+body[data-theme="cyber"] .tile{
+  color:#dbfbff;
+  border-color:rgba(0,229,255,.22);
+  box-shadow:0 12px 18px rgba(0,0,0,.28),0 0 12px rgba(0,229,255,.06);
+}
+body[data-theme="luxury"] .tile{
+  color:#4b3a17;
+  border-color:#b98b2c44;
+}
+.ownerTag{box-shadow:0 2px 8px rgba(0,0,0,.34),0 0 10px var(--v5-glow)}
+.token{
+  position:relative;
+  border-width:3px;
+}
+.token::after{
+  content:"";
+  position:absolute;inset:4px;border-radius:50%;
+  background:radial-gradient(circle at 32% 26%,rgba(255,255,255,.7),transparent 38%);
+  pointer-events:none;
+}
+.dice{
+  position:relative;
+  overflow:hidden;
+  animation:diceFloatV5 2.8s ease-in-out infinite alternate;
+}
+.dice::before{
+  content:"";
+  position:absolute;left:-30%;top:-20%;width:35%;height:140%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.58),transparent);
+  transform:rotate(18deg);
+  animation:diceShine 3.2s linear infinite;
+}
+@keyframes diceFloatV5{to{transform:translateZ(44px) translateY(-4px) rotate(2deg)}}
+@keyframes diceShine{to{left:125%}}
+.actionCard,.mini,.row{
+  border:1px solid rgba(255,255,255,.26);
+}
+body[data-theme="cyber"] .actionCard,
+body[data-theme="cyber"] .mini,
+body[data-theme="cyber"] .row,
+body[data-theme="cyber"] .chatMessages,
+body[data-theme="cyber"] .voiceStatus,
+body[data-theme="cyber"] #log{
+  background:#0b1430;
+  color:#defaff;
+}
+body[data-theme="luxury"] .actionCard,
+body[data-theme="luxury"] .mini,
+body[data-theme="luxury"] .row,
+body[data-theme="luxury"] .chatMessages,
+body[data-theme="luxury"] .voiceStatus,
+body[data-theme="luxury"] #log{
+  background:#1c160f;
+  color:#fff0c7;
+}
+body[data-theme="cyber"] input,
+body[data-theme="cyber"] select{
+  background:#0d1734;color:#e5fbff;outline-color:#00e5ff55;
+}
+body[data-theme="luxury"] input,
+body[data-theme="luxury"] select{
+  background:#241c12;color:#fff0c7;outline-color:#f4c34f55;
+}
+body[data-theme="cyber"] .themeSelect{background:#0d1734;color:#e5fbff}
+body[data-theme="luxury"] .themeSelect{background:#241c12;color:#fff0c7}
+body[data-theme="cyber"] button{
+  background:linear-gradient(180deg,#00d8ff,#0084c5);
+  box-shadow:0 6px 0 #005c88,0 0 18px rgba(0,229,255,.20);
+}
+body[data-theme="cyber"] button.gold{
+  background:linear-gradient(180deg,#ff4ed5,#c4179c);box-shadow:0 6px 0 #86106b,0 0 18px rgba(255,33,200,.18);color:white
+}
+body[data-theme="luxury"] button{
+  background:linear-gradient(180deg,#f3c85e,#b98220);
+  box-shadow:0 6px 0 #77520e,0 12px 22px rgba(0,0,0,.26);color:#261b08
+}
+body[data-theme="luxury"] button.gray{
+  background:linear-gradient(180deg,#67533a,#3c2e1f);box-shadow:0 6px 0 #241b12;color:#fff1ce
+}
+body[data-theme="realistic"] .board{
+  filter:saturate(.72) contrast(1.02);
+}
+.themePulse{
+  animation:themePulseV5 .55s ease;
+}
+@keyframes themePulseV5{
+  0%{opacity:.5;transform:scale(.99)}
+  60%{opacity:1;transform:scale(1.01)}
+  100%{transform:scale(1)}
+}
+@media(max-width:720px){
+  .themeSelect{min-width:145px;flex:1}
+  .heroBtns{width:100%}
+}
+
 </style>
 </head>
-<body>
+<body data-theme="fusion">
+
+<div class="v5Ambient" aria-hidden="true">
+  <div class="skyline skylineBack"></div>
+  <div class="skyline skylineFront"></div>
+  <div class="lightBeam beam1"></div>
+  <div class="lightBeam beam2"></div>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+  <div class="scanline"></div>
+</div>
 <div class="wrap">
   <header class="hero">
     <div class="card logo">
-      <h1>🌐 Cartoon City Tycoon V2</h1>
-      <div class="sub">Online 2–12 players • auto reconnect • chat • live voice • auctions • missions • power cards • mini-games</div>
+      <h1>🌐 Cartoon City Tycoon V5</h1>
+      <div class="sub">3D Luxury + Neon Cyber + Realistic themes • 2–12 online players • chat • voice • auctions • mini-games</div>
     </div>
     <div class="heroBtns">
-      <button class="gray slim" id="musicBtn">🎵 Music Off</button>
+      <select id="themeSelect" class="themeSelect" aria-label="Visual Theme">
+        <option value="fusion" selected>✨ Fusion 3D</option>
+        <option value="realistic">🏙️ Realistic 3D</option>
+        <option value="cyber">🌌 Neon Cyber</option>
+        <option value="luxury">💎 Luxury Casino</option>
+      </select>
+      <button class="gray slim" id="musicBtn">🎵 Music Auto</button>
       <button class="gray slim" id="sfxBtn">🔊 SFX On</button>
     </div>
   </header>
@@ -234,7 +644,7 @@ label{display:block;font-size:11px;font-weight:950;text-transform:uppercase;lett
       <section class="centerZone">
         <div>
           <div class="cityTitle">✨ Online Cartoon City ✨</div>
-          <div class="citySub">Own full districts for 1.5× rent • use powers • complete missions • bid in live auctions</div>
+          <div class="citySub">3D-style board • moving depth • complete missions • use powers • live auctions • mini-games</div>
         </div>
 
         <div class="diceArea"><div class="dice" id="dice1">⚀</div><div class="dice" id="dice2">⚀</div></div>
@@ -903,36 +1313,161 @@ function closePeer(playerId){
   if(pc)try{pc.close()}catch(e){}
 }
 
-// ---------- Music + SFX ----------
+
+
+// ---------- V5 visual themes ----------
+const THEME_KEY='cct:v5Theme';
+function applyTheme(theme,save=true){
+  if(!['fusion','realistic','cyber','luxury'].includes(theme))theme='fusion';
+  document.body.dataset.theme=theme;
+  el('themeSelect').value=theme;
+  const boardEl=el('board');
+  if(boardEl){
+    boardEl.classList.remove('themePulse');
+    void boardEl.offsetWidth;
+    boardEl.classList.add('themePulse');
+    setTimeout(()=>boardEl.classList.remove('themePulse'),600);
+  }
+  if(save)localStorage.setItem(THEME_KEY,theme);
+}
+el('themeSelect').addEventListener('change',e=>{
+  applyTheme(e.target.value,true);
+  if(typeof sfx==='function')sfx('power');
+});
+applyTheme(localStorage.getItem(THEME_KEY)||'fusion',false);
+
+
+// ---------- Music + SFX : V4 low-volume exciting background ----------
+let musicWanted=true;
+let masterGainNode=null, musicGainNode=null, sfxGainNode=null;
+let bassPulse=0, percPulse=0;
 function ensureAudio(){
-  if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  if(!audioCtx){
+    audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    masterGainNode=audioCtx.createGain();
+    musicGainNode=audioCtx.createGain();
+    sfxGainNode=audioCtx.createGain();
+    masterGainNode.gain.value=.68;
+    musicGainNode.gain.value=.10;
+    sfxGainNode.gain.value=.30;
+    musicGainNode.connect(masterGainNode);
+    sfxGainNode.connect(masterGainNode);
+    masterGainNode.connect(audioCtx.destination);
+  }
   if(audioCtx.state==='suspended')audioCtx.resume();
 }
-function tone(freq,dur=.12,type='sine',vol=.035,delay=0){
+function tone(freq,dur=.12,type='sine',vol=.035,delay=0,target='music'){
   ensureAudio();
-  const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+  const o=audioCtx.createOscillator(),g=audioCtx.createGain(),filter=audioCtx.createBiquadFilter();
+  filter.type='lowpass';
+  filter.frequency.value=target==='music'?1350:2200;
   o.type=type;o.frequency.value=freq;
   g.gain.setValueAtTime(.0001,audioCtx.currentTime+delay);
-  g.gain.exponentialRampToValueAtTime(vol,audioCtx.currentTime+delay+.012);
+  g.gain.exponentialRampToValueAtTime(vol,audioCtx.currentTime+delay+.02);
   g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+delay+dur);
-  o.connect(g);g.connect(audioCtx.destination);o.start(audioCtx.currentTime+delay);o.stop(audioCtx.currentTime+delay+dur+.03);
+  o.connect(filter);filter.connect(g);g.connect(target==='music'?musicGainNode:sfxGainNode);
+  o.start(audioCtx.currentTime+delay);o.stop(audioCtx.currentTime+delay+dur+.04);
 }
-const melody=[523,659,784,659,587,698,880,698,659,784,988,784,587,698,784,523];
-function tick(){if(!musicOn)return;tone(melody[musicStep++%melody.length],.18,'triangle',.017)}
-function startMusic(){ensureAudio();if(musicOn)return;musicOn=true;document.body.classList.add('party');el('musicBtn').textContent='🎵 Music On';tick();musicTimer=setInterval(tick,265)}
-function stopMusic(){musicOn=false;document.body.classList.remove('party');clearInterval(musicTimer);el('musicBtn').textContent='🎵 Music Off'}
+function clickNoise(vol=.010,delay=0){
+  ensureAudio();
+  const buffer=audioCtx.createBuffer(1,2205,audioCtx.sampleRate);
+  const ch=buffer.getChannelData(0);
+  for(let i=0;i<ch.length;i++) ch[i]=(Math.random()*2-1)*(1-i/ch.length);
+  const src=audioCtx.createBufferSource(), filter=audioCtx.createBiquadFilter(), gain=audioCtx.createGain();
+  filter.type='bandpass'; filter.frequency.value=1200;
+  gain.gain.setValueAtTime(vol,audioCtx.currentTime+delay);
+  gain.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+delay+.08);
+  src.buffer=buffer; src.connect(filter); filter.connect(gain); gain.connect(musicGainNode);
+  src.start(audioCtx.currentTime+delay); src.stop(audioCtx.currentTime+delay+.09);
+}
+const chordProg=[[220,277,330],[196,247,294],[174,220,262],[196,247,294]];
+const topNotes=[659,587,523,587,659,784,698,659,587,523,587,659,698,784,880,784];
+const topNotes2=[988,880,784,698,784,880,988,1047,988,880,784,698,659,587,523,587];
+function playMusicTick(){
+  if(!musicOn) return;
+  const intensity=currentMusicIntensity()*themeMusicMultiplier();
+  if(musicGainNode)musicGainNode.gain.setTargetAtTime(Math.min(.16,.10*intensity),audioCtx.currentTime,.08);
+  const idx=musicStep%16;
+  const chord=chordProg[Math.floor(musicStep/4)%chordProg.length];
+  const melodySet=(Math.floor(musicStep/16)%2===0)?topNotes:topNotes2;
+  tone(chord[0], .28, 'triangle', .026 + (bassPulse%2?0.004:0), 0, 'music');
+  if(idx%2===0) tone(chord[0]/2, .18, 'sine', .018, .01, 'music');
+  tone(melodySet[idx], .19, 'triangle', .020, .02, 'music');
+  if(idx%4===2) tone(melodySet[idx]*2, .08, 'sine', .006, .08, 'music');
+  if(idx%2===0) clickNoise(.006, .03);
+  if(idx%4===3) clickNoise(.008, .01);
+  bassPulse++; percPulse++; musicStep++;
+}
+
+function currentMusicIntensity(){
+  if(!room?.state)return .86;
+  if(room.state.turnStage==='auction')return 1.18;
+  if(room.state.turnStage==='miniGame')return 1.28;
+  if(room.state.finished)return 1.12;
+  return .92;
+}
+function themeMusicMultiplier(){
+  const t=document.body.dataset.theme;
+  if(t==='cyber')return 1.12;
+  if(t==='luxury')return .88;
+  if(t==='realistic')return .80;
+  return 1.0;
+}
+
+function startMusic(force=false){
+  ensureAudio();
+  if(musicOn && !force) return;
+  musicOn=true;
+  document.body.classList.add('party');
+  el('musicBtn').textContent='🎵 Music On';
+  clearInterval(musicTimer);
+  playMusicTick();
+  musicTimer=setInterval(playMusicTick,260);
+}
+function stopMusic(){
+  musicOn=false;
+  document.body.classList.remove('party');
+  clearInterval(musicTimer);
+  el('musicBtn').textContent='🎵 Music Off';
+}
 function sfx(type){
   if(!sfxOn)return;
   const sets={
-    dice:[330,392,440],buy:[523,659,784,988],upgrade:[659,784,988,1319],
-    coin:[784,988,1175],power:[587,784,1175],win:[523,659,784,1047,1319]
+    dice:[330,392,440],
+    buy:[523,659,784,988],
+    upgrade:[659,784,988,1319],
+    coin:[784,988,1175],
+    power:[587,784,1175],
+    win:[523,659,784,1047,1319]
   };
-  (sets[type]||[659,880]).forEach((n,i)=>tone(n,.11,'triangle',.042,i*.055));
+  (sets[type]||[659,880]).forEach((n,i)=>tone(n,.11,'triangle',.044,i*.055,'sfx'));
 }
-el('musicBtn').onclick=()=>{ensureAudio();musicOn?stopMusic():startMusic()};
-el('sfxBtn').onclick=()=>{ensureAudio();sfxOn=!sfxOn;el('sfxBtn').textContent=sfxOn?'🔊 SFX On':'🔇 SFX Off';if(sfxOn)sfx('coin')};
-
+function armAutoplayMusic(){
+  const unlock=()=>{
+    if(musicWanted) startMusic();
+    window.removeEventListener('pointerdown',unlock);
+    window.removeEventListener('keydown',unlock);
+  };
+  window.addEventListener('pointerdown',unlock,{once:true});
+  window.addEventListener('keydown',unlock,{once:true});
+}
+armAutoplayMusic();
+el('musicBtn').onclick=()=>{
+  ensureAudio();
+  musicWanted=!musicWanted;
+  if(musicWanted){ startMusic(true); el('musicBtn').textContent='🎵 Music On'; }
+  else { stopMusic(); }
+};
+el('sfxBtn').onclick=()=>{
+  ensureAudio();
+  sfxOn=!sfxOn;
+  el('sfxBtn').textContent=sfxOn?'🔊 SFX On':'🔇 SFX Off';
+  if(sfxOn)sfx('coin');
+};
+window.addEventListener('focus',()=>{ if(musicWanted) startMusic(true); });
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden && musicWanted) startMusic(true); });
 window.addEventListener('beforeunload',()=>{ if(voiceEnabled)socket.emit('voice:leave') });
+
 </script>
 </body>
 </html>

@@ -1,102 +1,58 @@
-# Cartoon City Tycoon Online V3
+# Cartoon City Tycoon Online V5 — Theme Fusion
 
-The game now supports **2–12 online players** and includes synchronized mini-games that interrupt the board game every few rounds.
+V5 keeps all V4 multiplayer/gameplay features and adds a visual theme system.
 
-## V3 highlights
+## New V5 visual modes
 
-### 2–12 players
-The host can choose a maximum room size of:
-- 6
-- 8
-- 10
-- 12 players
+Players can switch themes at any time:
 
-The rest of the multiplayer systems still work: room codes, automatic seat reconnection, text chat, voice chat, auctions, missions, market events, character abilities and power cards.
+- **Fusion 3D** — mixes neon lighting, glossy depth and luxury highlights
+- **Realistic 3D** — more muted materials, metal/stone tones and stronger physical depth
+- **Neon Cyber** — dark cyber city, cyan/magenta glow, holographic board edges
+- **Luxury Casino** — black/gold look, premium metallic edges and warm casino lighting
 
-### Synchronized mini-games
-The host can choose mini-games every 2, 3, 4 or 5 rounds, or switch them off.
+The selected theme is remembered in that browser.
 
-When a mini-game begins, normal board turns pause for everybody. The server controls the timer, answers, rewards and results so all computers stay synchronized.
+## 3D / "4D-style" effects
 
-Included mini-games:
+- Board perspective and hover tilt
+- Elevated 3D tiles
+- Reflective dice shine
+- Floating player pieces
+- Animated city skyline
+- Moving light beams
+- Ambient glowing orbs
+- Theme-dependent panels, buttons, tiles and board materials
+- Theme transition animation
 
-1. **Quick Math Race**
-   - Everyone sees the same arithmetic question.
-   - First three correct answers receive the largest rewards.
-   - Players have up to three attempts.
+## Adaptive low-volume background music
 
-2. **Treasure Pick**
-   - Every player selects one of 12 treasure chests.
-   - Cash rewards are shuffled privately on the server and revealed after selections.
+Music still starts automatically after the browser's first user interaction.
 
-3. **Dice Prediction**
-   - Predict LOW (2–6), EXACT 7, or HIGH (8–12).
-   - The server rolls two dice after everybody answers or the timer expires.
-   - Exact 7 pays the biggest reward.
+V5 keeps the volume low but changes its intensity:
+- normal turns = calm / exciting
+- live auctions = slightly more intense
+- mini-games = more intense
+- win screen = elevated energy
 
-4. **Reaction Rush**
-   - Everybody must wait for a server-defined GO time.
-   - First three valid clicks receive the biggest rewards.
-   - Clicking before GO is rejected.
+Theme also affects the music intensity:
+- Cyber = more energetic
+- Luxury = smoother
+- Realistic = softer
+- Fusion = balanced
 
-Mini-game rewards become part of the player's normal board-game cash.
+## Existing systems retained
 
-## Existing V2 systems retained
-
-- Automatic browser seat reconnection with private reconnect tokens
-- 45-second reconnect grace period before an offline current turn is skipped
-- Persistent room state in `data/rooms.json`
-- Real-time text chat
-- WebRTC microphone voice chat
-- Live property auctions
-- District ownership bonuses
-- Individual missions
-- Power cards
-- Character abilities
-- Changing market events
-- 12/20/30/40/endless board-game length
-
-## Voice chat with larger rooms
-
-V3 allows up to 12 players in the room. The included voice system is peer-to-peer WebRTC mesh voice.
-
-This is convenient for small groups, but with 9–12 simultaneous talkers each browser has more peer connections and uses more upload/download bandwidth.
-
-For a production game with frequent 10–12 person voice chat, consider replacing mesh voice with an SFU service such as LiveKit, mediasoup, Janus, or another hosted WebRTC SFU.
-
-A TURN server is still recommended for players on different home/mobile networks.
-
-Environment variables:
-
-`TURN_URL`
-`TURN_USERNAME`
-`TURN_CREDENTIAL`
-
-## Run locally
-
-1. Install Node.js 18 or newer.
-2. Extract the project.
-3. On Windows, double-click `START_WINDOWS.bat`.
-
-Or run:
-
-`npm install`
-`npm start`
-
-Then open:
-
-`http://localhost:3000`
-
-## Play online
-
-Host the entire folder on a Node.js server with a public HTTPS URL.
-
-All players visit the same URL. One person creates a room and shares the 5-character room code.
-
-## Main files
-
-- `server.js` — authoritative game server, reconnect, mini-games, auctions, chat, voice signaling and game rules
-- `public/index.html` — browser board game, mini-game UI, voice/chat UI
-- `data/rooms.json` — generated automatically for room persistence
-- `START_WINDOWS.bat` — Windows launcher
-- `Dockerfile` — optional container deployment
+- 2–12 online players
+- room codes
+- automatic reconnection
+- server room persistence
+- text chat
+- WebRTC voice
+- character abilities
+- districts
+- missions
+- power cards
+- market events
+- live auctions
+- synchronized mini-games
