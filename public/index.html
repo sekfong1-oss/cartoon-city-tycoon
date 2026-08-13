@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
-<title>Cartoon City Tycoon V5 Theme Fusion</title>
+<title>Cartoon City Tycoon V5.1 Theme Fusion Contrast Fix</title>
 <style>
 :root{
   --ink:#24305e;--panel:#ffffffdf;--shadow:0 16px 42px rgba(37,49,105,.18);
@@ -283,7 +283,7 @@ button.red{
 }
 
 
-/* ===== V5 Theme Fusion: Realistic 3D + Neon Cyber + Luxury Casino ===== */
+/* ===== V5 Theme Fusion Contrast Fix: Realistic 3D + Neon Cyber + Luxury Casino ===== */
 :root{
   --v5-glow:rgba(126,103,255,.40);
   --v5-accent:#7d6bff;
@@ -555,6 +555,177 @@ body[data-theme="realistic"] .board{
   .heroBtns{width:100%}
 }
 
+
+/* ===== V5.1 contrast/readability fix ===== */
+:root{
+  --v51-panelText:#222b57;
+  --v51-softText:#5f6894;
+  --v51-boardText:#34406f;
+  --v51-headingText:#ffffff;
+  --v51-inputBg:#ffffff;
+}
+body[data-theme="fusion"]{
+  --v51-panelText:#22305c;
+  --v51-softText:#67739c;
+  --v51-boardText:#48537e;
+  --v51-headingText:#eef6ff;
+  --v51-inputBg:#fbfcff;
+}
+body[data-theme="realistic"]{
+  --v51-panelText:#253543;
+  --v51-softText:#607483;
+  --v51-boardText:#526575;
+  --v51-headingText:#eef6f9;
+  --v51-inputBg:#fcfdff;
+}
+body[data-theme="cyber"]{
+  --v51-panelText:#e7fbff;
+  --v51-softText:#9fdcea;
+  --v51-boardText:#bbf5ff;
+  --v51-headingText:#f3fdff;
+  --v51-inputBg:#101a36;
+}
+body[data-theme="luxury"]{
+  --v51-panelText:#fff0c9;
+  --v51-softText:#d5be86;
+  --v51-boardText:#f7e4ae;
+  --v51-headingText:#fff6df;
+  --v51-inputBg:#241c12;
+}
+
+/* Main readable surfaces */
+.logo,.panel,.card,.actionCard,.mini,.row,.chatMessages,.voiceStatus,#log,.status .stat{
+  color:var(--v51-panelText) !important;
+}
+.logo{
+  background:
+    linear-gradient(145deg,rgba(255,255,255,.24),rgba(255,255,255,.10)),
+    rgba(255,255,255,.86) !important;
+}
+body[data-theme="realistic"] .logo{
+  background:
+    linear-gradient(145deg,rgba(255,255,255,.18),rgba(255,255,255,.08)),
+    rgba(248,251,253,.90) !important;
+}
+body[data-theme="cyber"] .logo{
+  background:
+    linear-gradient(145deg,rgba(11,26,53,.96),rgba(17,11,42,.96)) !important;
+}
+body[data-theme="luxury"] .logo{
+  background:
+    linear-gradient(145deg,rgba(35,27,18,.97),rgba(18,14,10,.97)) !important;
+}
+
+.cityTitle{
+  color:var(--v51-headingText) !important;
+  opacity:1 !important;
+}
+.logo .sub,
+.sub,
+.heroSub,
+.muted,
+.small,
+.note,
+.statusLabel,
+.tileSmall,
+.tileHint,
+.label,
+.hint,
+#lobbyNote,
+#roomInfo,
+#actionText,
+#voiceHint{
+  color:var(--v51-softText) !important;
+  opacity:1 !important;
+}
+.logo p,
+.logo small,
+.panel p,
+.panel small,
+.card p,
+.card small{
+  color:var(--v51-softText) !important;
+  opacity:1 !important;
+}
+
+/* Labels / form fields */
+label, .inputLabel, .sectionTitle, .metaLabel, .fieldLabel{
+  color:var(--v51-softText) !important;
+  font-weight:800 !important;
+  opacity:1 !important;
+}
+input,select,textarea{
+  background:var(--v51-inputBg) !important;
+  color:var(--v51-panelText) !important;
+  border-color:rgba(120,132,198,.28) !important;
+  font-weight:700 !important;
+}
+input::placeholder, textarea::placeholder{
+  color:color-mix(in srgb, var(--v51-softText) 82%, white 18%) !important;
+  opacity:1 !important;
+}
+.themeSelect{
+  font-weight:800 !important;
+}
+
+/* Board text */
+.tile,
+.centerZone,
+.board,
+.tileName,
+.tileDesc,
+.tilePrice,
+.ownerName,
+.ownerTag{
+  color:var(--v51-boardText) !important;
+}
+.tile .name,
+.tile .label,
+.tile .price,
+.tile span,
+.tile small{
+  color:var(--v51-boardText) !important;
+  opacity:1 !important;
+}
+.centerZone .cityTitle{
+  color:color-mix(in srgb, var(--v51-boardText) 82%, white 18%) !important;
+}
+.centerZone .sub,
+.centerZone p,
+.centerZone small{
+  color:var(--v51-softText) !important;
+  opacity:1 !important;
+}
+
+/* Buttons: keep readable text */
+button{font-weight:900 !important}
+button.gray{color:#fff !important}
+body[data-theme="cyber"] button,
+body[data-theme="cyber"] button.gray{
+  color:#ffffff !important;
+}
+body[data-theme="luxury"] button.good,
+body[data-theme="luxury"] button.gold,
+body[data-theme="luxury"] button.red{
+  color:#1f1407 !important;
+}
+body[data-theme="luxury"] button.gray{
+  color:#fff1ce !important;
+}
+
+/* Improve white cards/tiles contrast */
+.tile{
+  box-shadow:
+    0 10px 18px rgba(66,72,130,.22),
+    inset 0 1px 0 rgba(255,255,255,.86),
+    inset 0 -10px 20px rgba(127,136,196,.06) !important;
+}
+.panel,.card,.actionCard,.mini,.row,.chatMessages,.voiceStatus,#log,.status .stat{
+  box-shadow:
+    0 12px 24px rgba(24,28,83,.14),
+    inset 0 1px 0 rgba(255,255,255,.48) !important;
+}
+
 </style>
 </head>
 <body data-theme="fusion">
@@ -572,7 +743,7 @@ body[data-theme="realistic"] .board{
 <div class="wrap">
   <header class="hero">
     <div class="card logo">
-      <h1>🌐 Cartoon City Tycoon V5</h1>
+      <h1>🌐 Cartoon City Tycoon V5.1</h1>
       <div class="sub">3D Luxury + Neon Cyber + Realistic themes • 2–12 online players • chat • voice • auctions • mini-games</div>
     </div>
     <div class="heroBtns">
@@ -1332,10 +1503,39 @@ function applyTheme(theme,save=true){
 }
 el('themeSelect').addEventListener('change',e=>{
   applyTheme(e.target.value,true);
+  forceReadableText();
   if(typeof sfx==='function')sfx('power');
 });
 applyTheme(localStorage.getItem(THEME_KEY)||'fusion',false);
+setTimeout(forceReadableText,120);
 
+
+
+// ---------- V5.1 readability helper ----------
+function forceReadableText(){
+  const themed = document.body.dataset.theme || 'fusion';
+  const darkThemes = ['cyber','luxury'];
+  const panelText = darkThemes.includes(themed) ? '' : '#23305c';
+  const softText = darkThemes.includes(themed) ? '' : '#66739b';
+  const boardText = darkThemes.includes(themed) ? '' : '#4a557d';
+
+  document.querySelectorAll('.cityTitle').forEach(elm=>{
+    if(!elm.closest('.centerZone')) elm.style.color = darkThemes.includes(themed) ? '' : '#eef6ff';
+  });
+  document.querySelectorAll('.logo,.panel,.card,.actionCard,.mini,.row,.chatMessages,.voiceStatus,#log,.status .stat').forEach(elm=>{
+    if(panelText) elm.style.color = panelText;
+  });
+  document.querySelectorAll('.sub,.heroSub,.muted,.small,.note,label,.sectionTitle,.metaLabel,.fieldLabel').forEach(elm=>{
+    if(softText){
+      elm.style.color = softText;
+      elm.style.opacity = '1';
+    }
+  });
+  document.querySelectorAll('.tile,.tile *:not(.ownerTag),.centerZone,.centerZone *').forEach(elm=>{
+    if(boardText && !elm.classList.contains('cityTitle')) elm.style.color = boardText;
+  });
+}
+setTimeout(forceReadableText,80);
 
 // ---------- Music + SFX : V4 low-volume exciting background ----------
 let musicWanted=true;
